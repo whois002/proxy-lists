@@ -7,135 +7,141 @@ var EventEmitter = require('events').EventEmitter || require('events');
 var request = require('request');
 
 var anonymityLevelFixes = {
-	'Transparent': 'transparent',
-	'Anonymous': 'anonymous',
-	'Distorting': 'anonymous',
-	'High Anonymous': 'elite'
+    'Transparent': 'transparent',
+    'Anonymous': 'anonymous',
+    'Distorting': 'anonymous',
+    'High Anonymous': 'elite'
 };
 
 var limitPerPage = 50;
 
 module.exports = {
 
-	homeUrl: 'http://proxydb.net/',
+    homeUrl: 'http://proxydb.net/',
 
-	getProxies: function(options) {
+    getProxies: function (options) {
 
-		options || (options = {});
+        options || (options = {});
 
-		var emitter = new EventEmitter();
+        var emitter = new EventEmitter();
 
-		var getPageOfProxies = async.seq(
-			this.getPageHtml,
-			this.parsePageHtml
-		);
+        var getPageOfProxies = async.seq(
+            this.getPageHtml,
+            this.parsePageHtml
+        );
 
-		options.countries = _.map(options.countries, function(country) {
-			return country.toUpperCase();
-		});
+        options.countries = _.map(options.countries, function (country) {
+            return country.toUpperCase();
+        });
 
-		var numProxiesFromLastPage;
+        var numProxiesFromLastPage;
 
-		async.until(function() { return numProxiesFromLastPage < limitPerPage; }, function(nextPage) {
+        async.until(function () {
+            return numProxiesFromLastPage < limitPerPage;
+        }, function (nextPage) {
 
-			var page = 1;
+            var page = 1;
 
-			getPageOfProxies(page++, options, function(error, proxies) {
+            getPageOfProxies(page++, options, function (error, proxies) {
 
-				if (error) {
-					return nextPage(error);
-				}
+                if (error) {
+                    return nextPage(error);
+                }
 
-				if (options.sample) {
-					// Stop after this page.
-					numProxiesFromLastPage = 0;
-				} else {
-					// Will continue if there are more pages to get.
-					numProxiesFromLastPage = proxies && proxies.length || 0;
-				}
+                if (options.sample) {
+                    // Stop after this page.
+                    numProxiesFromLastPage = 0;
+                } else {
+                    // Will continue if there are more pages to get.
+                    numProxiesFromLastPage = proxies && proxies.length || 0;
+                }
 
-				emitter.emit('data', proxies);
-				nextPage();
-			});
+                emitter.emit('data', proxies);
+                nextPage();
+            });
 
-		}, function(error) {
+        }, function (error) {
 
-			if (error) {
-				emitter.emit('error', error);
-			}
+            if (error) {
+                emitter.emit('error', error);
+            }
 
-			emitter.emit('end');
-		});
+            emitter.emit('end');
+        });
 
-		return emitter;
-	},
+        return emitter;
+    },
 
-	getPageHtml: function(page, options, cb) {
+    getPageHtml: function (page, options, cb) {
 
-		var requestOptions = {
-			method: 'GET',
-			url: 'http://proxydb.net/',
-			qs: {
-				offset: (page - 1) * limitPerPage,
-				protocol: options.protocols,
-				anonlvl: []
-			}
-		};
+        var requestOptions = {
+            method: 'GET',
+            url: 'http://proxydb.net/',
+            qs: {
+                offset: (page - 1) * limitPerPage,
+                protocol: options.protocols,
+                anonlvl: []
+            }
+        };
 
-		if (_.contains(options.anonymityLevels, 'transparent')) {
-			requestOptions.qs.anonlvl.push(1);
-		}
+        if (_.contains(options.anonymityLevels, 'transparent')) {
+            requestOptions.qs.anonlvl.push(1);
+        }
 
-		if (_.contains(options.anonymityLevels, 'anonymous')) {
-			requestOptions.qs.anonlvl.push(2);
-			requestOptions.qs.anonlvl.push(3);
-		}
+        if (_.contains(options.anonymityLevels, 'anonymous')) {
+            requestOptions.qs.anonlvl.push(2);
+            requestOptions.qs.anonlvl.push(3);
+        }
 
-		if (_.contains(options.anonymityLevels, 'elite')) {
-			requestOptions.qs.anonlvl.push(4);
-		}
+        if (_.contains(options.anonymityLevels, 'elite')) {
+            requestOptions.qs.anonlvl.push(4);
+        }
 
-		request(requestOptions, function(error, response, html) {
+        request(requestOptions, function (error, response, html) {
 
-			if (error) {
-				return cb(error);
-			}
+            if (error) {
+                return cb(error);
+            }
 
-			cb(null, html);
-		});
-	},
+            cb(null, html);
+        });
+    },
 
-	parsePageHtml: function(html, cb) {
+    parsePageHtml: function (html, cb) {
 
-		try {
+        try {
 
-			var proxies = [];
-			var $ = cheerio.load(html);
+            var proxies = [];
+            var $ = cheerio.load(html);
 
-			$('table tbody tr').each(function() {
+            $('table tbody tr').each(function () {
 
-				var $tr = $(this);
-				var host = $tr.find('td:nth-child(1) a').text().trim().split(':');
-				var protocol = $tr.find('td:nth-child(2)').text().trim().toLowerCase();
-				var anonymityLevel = $tr.find('td:nth-child(3)').text().trim();
+                var $tr = $(this);
+                var host = $tr.find('td:nth-child(1) a').text().trim().split(':');
+                var protocol = $tr.find('td:nth-child(2)').text().trim().toLowerCase();
+                var anonymityLevel = $tr.find('td:nth-child(3)').text().trim();
+                var availability = $tr.find('td:nth-child(4)').text().trim();
+                var rtime = $tr.find('td:nth-child(5)').text().trim();
 
-				var proxy = {
-					ipAddress: host[0],
-					port: parseInt(host[1]),
-					protocols: [protocol]
-				};
+                var proxy = {
+                    ipAddress: host[0],
+                    port: parseInt(host[1]),
+                    protocols: [protocol],
+                    availability: availability,
+                    rtime: rtime
+                };
 
-				if (anonymityLevel && anonymityLevelFixes[anonymityLevel]) {
-					proxy.anonymityLevel = anonymityLevelFixes[anonymityLevel];
-				}
+                if (anonymityLevel && anonymityLevelFixes[anonymityLevel]) {
+                    proxy.anonymityLevel = anonymityLevelFixes[anonymityLevel];
+                }
 
-				proxies.push(proxy);
-			});
+                proxies.push(proxy);
+            });
 
-		} catch (error) {
-			return cb(error);
-		}
+        } catch (error) {
+            return cb(error);
+        }
 
-		cb(null, proxies);
-	}
+        cb(null, proxies);
+    }
 };
