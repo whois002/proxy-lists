@@ -139,7 +139,7 @@ var Source = module.exports = {
 	},
 
 	parseData: function(data, cb) {
-
+		console.log('data', data);
 		_.defer(function() {
 
 			var proxies = [];
