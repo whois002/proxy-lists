@@ -5,7 +5,9 @@ var ProxyLists = require('../../index.js');
 
 var options = {
     countries: ['cn'],
-    sample:false,
+    sample: true,
+    protocols: ['http'],
+    speedCheck: true,
     /*
      Anonymity level.
 
@@ -16,7 +18,7 @@ var options = {
 
 // `gettingProxies` is an event emitter object.
 //var gettingProxies = ProxyLists.getProxies(options);
-var gettingProxies = ProxyLists.getProxiesFromSource('bugng', options);
+var gettingProxies = ProxyLists.getProxiesFromSource('proxydb', options);
 
 gettingProxies.on('data', function (proxies) {
     // Received some proxies.

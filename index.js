@@ -5,6 +5,7 @@ var async = require('async');
 var EventEmitter = require('events').EventEmitter || require('events');
 var GeoIpNativeLite = require('geoip-native-lite');
 var net = require('net');
+var speedCheck = require('./speedCheck');
 
 var ProxyLists = module.exports = {
 
@@ -155,6 +156,10 @@ var ProxyLists = module.exports = {
                 });
 
                 proxies = ProxyLists.filterProxies(proxies, options);
+
+                if(options.speedCheck)
+                    speedCheck(proxies, options);
+
                 onData(proxies);
             });
 

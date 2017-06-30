@@ -88,7 +88,7 @@ module.exports = {
     },
 
     getListHtml: function (page, listUrl, cb) {
-        console.log('page',page)
+        console.log('page', page)
         request({
             method: 'GET',
             url: page ? listUrl + '?page=' + page : listUrl
@@ -121,12 +121,18 @@ module.exports = {
 
                 var requestType = $('td', tr).eq(4).text().toString().toLowerCase();
 
+                var speed = $('td', tr).eq(5).text().toString().toLowerCase();
+
+                var checkTime = $('td', tr).eq(6).text().toString().toLowerCase();
+
                 proxies.push({
                     ipAddress: ipAddress,
                     port: port,
                     protocols: [protocol],
                     anonymityLevel: anonymityLevel,
-                    requestType: requestType
+                    requestType: requestType,
+                    speed: speed,
+                    checkTime: checkTime
                 });
             });
 
