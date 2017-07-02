@@ -4,21 +4,21 @@
 var ProxyLists = require('../../index.js');
 
 var options = {
-    countries: ['cn'],
+    countries: null,
     sample: true,
-    protocols: ['http'],
+    protocols: ['http', 'https'],
     speedCheck: true,
     /*
      Anonymity level.
 
      To get all proxies, regardless of anonymity level, set this option to NULL.
      */
-    anonymityLevels: ['anonymous', 'elite']
+    anonymityLevels: ['transparent', 'anonymous', 'elite']
 };
 
 // `gettingProxies` is an event emitter object.
 //var gettingProxies = ProxyLists.getProxies(options);
-var gettingProxies = ProxyLists.getProxiesFromSource('proxydb', options);
+var gettingProxies = ProxyLists.getProxiesFromSource('bugng', options);
 
 gettingProxies.on('data', function (proxies) {
     // Received some proxies.

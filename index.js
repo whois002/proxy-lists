@@ -148,6 +148,7 @@ var ProxyLists = module.exports = {
 
                 proxies || (proxies = []);
 
+                console.log('gettingProxies ' + proxies.length);
                 // Add the 'source' attribute to every proxy.
                 proxies = _.map(proxies, function (proxy) {
                     proxy.source = name;
@@ -156,11 +157,11 @@ var ProxyLists = module.exports = {
                 });
 
                 proxies = ProxyLists.filterProxies(proxies, options);
-
-                if(options.speedCheck)
-                    speedCheck(proxies, options);
-
-                onData(proxies);
+                console.log('filterProxies ' + proxies.length);
+                if (options.speedCheck)
+                    speedCheck(proxies, options, onData);
+                else
+                    onData(proxies);
             });
 
             gettingProxies.on('error', onError);
@@ -255,6 +256,8 @@ var ProxyLists = module.exports = {
         if (options.anonymityLevels) {
 
             anonymityLevelsTest = arrayToHash(options.anonymityLevels);
+
+            console.log('anonymityLevelsTest', anonymityLevelsTest);
         }
 
         return _.filter(proxies, function (proxy) {
@@ -330,8 +333,7 @@ var ProxyLists = module.exports = {
         });
 
         // 'ipAddress' and 'port' are required.
-        return !!proxy.ipAddress && (!options.validateIp || this.isValidIpAddress(proxy.ipAddress)) &&
-            !!proxy.port && this.isValidPort(proxy.port) &&
+        return !!proxy.ipAddress && (!options.validateIp || this.isValidIpAddress(proxy.ipAddress)) && !!proxy.port && this.isValidPort(proxy.port) &&
             // 'protocols' is not required, but if it's set it should be valid.
             (_.isUndefined(proxy.protocols) || this.isValidProxyProtocols(proxy.protocols)) &&
             // 'anonymityLevel' is not required, but if it's set it should be valid.

@@ -118,22 +118,38 @@ module.exports = {
                 }
 
                 var protocol = $('td', tr).eq(3).text().toString().toLowerCase();
-
+                var protocolArray = protocol.split(', ')
                 var requestType = $('td', tr).eq(4).text().toString().toLowerCase();
 
                 var speed = $('td', tr).eq(5).text().toString().toLowerCase();
 
                 var checkTime = $('td', tr).eq(6).text().toString().toLowerCase();
 
-                proxies.push({
-                    ipAddress: ipAddress,
-                    port: port,
-                    protocols: [protocol],
-                    anonymityLevel: anonymityLevel,
-                    requestType: requestType,
-                    speed: speed,
-                    checkTime: checkTime
-                });
+                if(protocolArray.length > 1) {
+                    protocolArray.forEach(function (protocol) {
+                        proxies.push({
+                            ipAddress: ipAddress,
+                            port: port,
+                            protocols: [protocol],
+                            anonymityLevel: anonymityLevel,
+                            requestType: requestType,
+                            speed: speed,
+                            checkTime: checkTime
+                        });
+                    })
+                }
+                else
+                {
+                    proxies.push({
+                        ipAddress: ipAddress,
+                        port: port,
+                        protocols: [protocol],
+                        anonymityLevel: anonymityLevel,
+                        requestType: requestType,
+                        speed: speed,
+                        checkTime: checkTime
+                    });
+                }
             });
 
         } catch (error) {
